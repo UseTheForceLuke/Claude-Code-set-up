@@ -4,7 +4,7 @@
   },
   "permissions": {
     "defaultMode": "auto",
-    "bash": "allow"
+    "allow": ["Bash"]
   },
   "model": "opus[1m]",
   "hooks": {
@@ -21,11 +21,8 @@
       }
     ]
   },
-  "alwaysThinkingEnabled": false,
   "effortLevel": "xhigh",
-  "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
-  "skipAutoPermissionPrompt": true,
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true
   },
