@@ -19,7 +19,9 @@ This repo is the **canonical clean state** after a real cleanup. The
 `~/.claude/` to this layout — 9 steps, with real numbers from one cleanup
 (~1.5 GB → ~9 MB).
 
-## Quick install (Windows)
+**Windows only.** This repo uses PowerShell scripts and assumes Claude Code is installed on Windows.
+
+## Quick install
 
 ```powershell
 git clone https://github.com/UseTheForceLuke/Claude-Code-set-up $env:USERPROFILE\Claude-Code-set-up
@@ -35,41 +37,34 @@ or session transcripts.
 - `.\install.ps1 -DryRun` to preview without writing
 - `.\install.ps1 -SkipSettings` to keep your existing `settings.json`
 - `.\uninstall.ps1` to back out cleanly (preserves customized settings)
+- `.\test.ps1` to smoke-test the repo **before installing** (12 checks: scripts
+  parse, hooks block/allow correctly, JSON renders, Get-Help works, statusline
+  emits, install.ps1 pre-flight fires on missing files). This does NOT touch
+  `~/.claude/` — it only validates the repo's own scripts work. Run it if you
+  forked / cloned a long-running branch and want confidence before `install.ps1`
+  writes anything.
 
 **Restart Claude Code after install.** Settings, hooks, and statusline only
 re-load at session start. If you're already in a session, `Ctrl+D` to exit,
 then `claude` to relaunch.
 
-## Manual install (macOS / Linux)
+## Updating (pull latest)
 
-The repo ships PowerShell scripts (`install.ps1`, `statusline-command.ps1`),
-which won't run as-is on Unix. The CLAUDE.md, settings template, hooks, and
-SETUP.md are all platform-neutral — install them by hand:
+When this repo gets new fixes, pull them in:
 
-```bash
-REPO=~/Claude-Code-set-up
-CLAUDE_HOME=~/.claude
-
-git clone https://github.com/UseTheForceLuke/Claude-Code-set-up $REPO
-
-# 1. CLAUDE.md
-cp $REPO/CLAUDE.md $CLAUDE_HOME/CLAUDE.md
-
-# 2. Render settings.json (substitute ${CLAUDE_HOME})
-sed "s|\${CLAUDE_HOME}|$CLAUDE_HOME|g" $REPO/settings.template.json > $CLAUDE_HOME/settings.json
-
-# 3. Hooks
-mkdir -p $CLAUDE_HOME/hooks
-cp $REPO/hooks/*.py $CLAUDE_HOME/hooks/
-
-# 4. Statusline — the PowerShell script will NOT work on macOS/Linux.
-#    Either skip the statusLine block in settings.json, or write your own
-#    shell-script equivalent. The script reads session JSON from stdin and
-#    prints "session-id | NN% ctx | NNNk left".
+```powershell
+cd $env:USERPROFILE\Claude-Code-set-up
+git pull
+.\test.ps1            # optional - verify the new state before installing
+.\install.ps1         # re-runs idempotently; safe to invoke after every pull
 ```
 
-Drop the `statusLine` block from your settings.json if you don't have a Unix
-equivalent — Claude Code falls back to its built-in statusline cleanly.
+`install.ps1` is idempotent: re-running it just overwrites `~/.claude/CLAUDE.md`,
+`settings.json`, and the hooks/scripts with the repo's current versions. Your
+API key, OAuth tokens, memory, and skills are not touched.
+
+If you've customized `~/.claude/settings.json` and don't want it overwritten,
+use `.\install.ps1 -SkipSettings`.
 
 ## Layout
 
@@ -230,6 +225,40 @@ Claude tends to write scratch files wherever the conversation is. Over months
 this scatters generated files across tracked repos. **Step 9** of
 [SETUP.md](SETUP.md) covers declaring a dedicated `<project>/claude-artifacts/`
 folder and pinning the rule via memory.
+
+## Security
+
+This repo and its install scripts:
+
+- **Make zero network calls** during install or runtime. `install.ps1` only
+  copies local files; the hooks (`block-trunk-commit.py`, `block-oauth-leak.py`)
+  only run local `git` subprocesses (`git branch --show-current`, `git diff`).
+- **Never read your API key or OAuth tokens.** `install.ps1` only checks
+  whether `~/.claude/config.json` exists (`Test-Path`) to print a friendly
+  reminder; the file's content is never parsed or transmitted.
+- **Never write outside `~/.claude/`.** Install only writes to
+  `~/.claude/{CLAUDE.md, settings.json, hooks/, scripts/}`. Uninstall only
+  removes from those same paths.
+- **Contain no real secrets.** The single `eyJ...` JWT-shaped string in the
+  repo is a deliberately-fake test fixture in `test.ps1` (decoded header:
+  `{"kid":"...","ver":"1.0"}`, no valid payload or signature).
+
+Audit yourself:
+
+```powershell
+# Search for outbound network calls (cmdlets/functions, not the literal string "http"):
+Select-String -Path install.ps1, uninstall.ps1, test.ps1, hooks/*.py, scripts/*.ps1 `
+  -Pattern "Invoke-RestMethod|Invoke-WebRequest|System\.Net\.Http|urllib|requests\.|socket\.|http\.client|urlopen|curl\s|wget\s"
+
+# Search for embedded secrets (regex - DON'T use -SimpleMatch, it disables regex):
+Select-String -Path *, hooks/*, scripts/* -Pattern "sk-ant-|eyJ|AKIA|ghp_|xoxb-|github_pat_"
+```
+
+Expected result for the first command: no matches (no network calls anywhere in this repo's executable code).
+
+Expected result for the second command: two matches, both false positives:
+- `install.ps1`: a literal `sk-ant-...` placeholder string in the "missing API key" warning message
+- `test.ps1`: a deliberately-fake JWT fixture for the smoke test
 
 ## License
 

@@ -45,6 +45,12 @@ $ErrorActionPreference = "Stop"
 $RepoRoot   = $PSScriptRoot
 $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
 
+if (-not $RepoRoot) {
+  Write-Host "ERROR: `$PSScriptRoot is empty." -ForegroundColor Red
+  Write-Host "Run this script directly: .\install.ps1 (not via dot-sourcing)" -ForegroundColor Red
+  exit 1
+}
+
 function Write-Step([string]$msg) {
   Write-Host "==> $msg" -ForegroundColor Cyan
 }
@@ -56,6 +62,33 @@ function Copy-OrDryRun([string]$src, [string]$dst) {
     Copy-Item -Force $src $dst
     Write-Host "    copied: $(Split-Path $dst -Leaf)" -ForegroundColor Green
   }
+}
+
+# --- Pre-flight: verify all source files exist in the repo ---
+$requiredFiles = @(
+  "$RepoRoot\CLAUDE.md",
+  "$RepoRoot\settings.template.json",
+  "$RepoRoot\hooks\block-trunk-commit.py",
+  "$RepoRoot\hooks\block-oauth-leak.py",
+  "$RepoRoot\scripts\statusline-command.ps1"
+)
+$missing = $requiredFiles | Where-Object { -not (Test-Path $_) }
+if ($missing) {
+  Write-Host "ERROR: required source files are missing from the repo:" -ForegroundColor Red
+  $missing | ForEach-Object { Write-Host "  - $_" -ForegroundColor Red }
+  Write-Host ""
+  Write-Host "Did the clone complete? Try 'git pull' or re-clone." -ForegroundColor Red
+  exit 1
+}
+
+# --- Pre-flight: check Python is on PATH (hooks need it) ---
+$pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+if (-not $pythonCmd) {
+  Write-Host "WARNING: 'python' not found on PATH." -ForegroundColor Yellow
+  Write-Host "  The hooks (block-trunk-commit.py, block-oauth-leak.py) need Python 3 to run." -ForegroundColor Yellow
+  Write-Host "  Install Python from https://python.org, then re-run." -ForegroundColor Yellow
+  Write-Host "  Continuing anyway - the hooks will fail at git-commit time until Python is on PATH." -ForegroundColor Yellow
+  Write-Host ""
 }
 
 # --- Sanity: create ~/.claude/ if missing ---

@@ -1,5 +1,22 @@
-# Claude Code statusLine command
-# Output: "session-id | NN% ctx | NNNk left"
+<#
+.SYNOPSIS
+Claude Code statusLine command - prints "session-id | NN% ctx | NNNk left".
+
+.DESCRIPTION
+Reads session state JSON from stdin (provided by Claude Code's statusLine
+hook) and emits a one-line status string suitable for display in the
+terminal footer.
+
+Output fields:
+  session-id    Full UUID from the session_id field
+  NN% ctx       Percent of context window used (rounded)
+  NNNk left     Tokens remaining (rounded to thousands)
+
+Fallback: "?% ctx | ?k left" if the JSON is malformed or missing fields.
+
+.LINK
+https://github.com/UseTheForceLuke/Claude-Code-set-up
+#>
 
 $ErrorActionPreference = "SilentlyContinue"
 

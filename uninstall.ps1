@@ -55,6 +55,12 @@ $ErrorActionPreference = "Stop"
 $RepoRoot   = $PSScriptRoot
 $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
 
+if (-not $RepoRoot) {
+  Write-Host "ERROR: `$PSScriptRoot is empty." -ForegroundColor Red
+  Write-Host "Run this script directly: .\uninstall.ps1 (not via dot-sourcing)" -ForegroundColor Red
+  exit 1
+}
+
 function Confirm-Remove([string]$path) {
   if (-not (Test-Path $path)) {
     Write-Host "    skip (not present): $path" -ForegroundColor DarkGray

@@ -251,12 +251,21 @@ Get-ChildItem $env:USERPROFILE\.claude -Recurse -Force -ErrorAction SilentlyCont
   Measure-Object -Property Length -Sum |
   ForEach-Object { "{0:N2} MB" -f ($_.Sum / 1MB) }
 
-# settings.json should not reference any deleted scripts
-Get-Content $env:USERPROFILE\.claude\settings.json
+# settings.json should be valid JSON and reference only files that exist
+Get-Content $env:USERPROFILE\.claude\settings.json -Raw | ConvertFrom-Json
 
-# Check that the only hook is block-trunk-commit.py
+# Hooks present (only the ones from this repo)
 Get-ChildItem $env:USERPROFILE\.claude\hooks
 ```
+
+Or run the repo's smoke test - 12 checks `test.ps1` runs:
+
+```powershell
+cd $env:USERPROFILE\Claude-Code-set-up
+.\test.ps1
+```
+
+Exit code 0 + "All checks passed." = green. Exit 1 = something regressed.
 
 Restart Claude Code. The skills list in your first system reminder should
 **shrink** dramatically — that's the win. Project-specific skills now load only
@@ -549,11 +558,10 @@ conventions without being prompted.
 Open a fresh Claude Code session in the project directory. The first system
 prompt should include your `MEMORY.md` content. If it doesn't show up:
 
-1. Check the workdir slug matches your cwd — it's case-sensitive on Linux/Mac.
-2. On Windows, the slug uses one `-` per backslash, so
-   `C:\Users\You\work\proj` becomes `C--Users-You-work-proj`.
-3. Confirm `MEMORY.md` exists in that directory (`Get-ChildItem` it).
-4. Inside Claude Code, run `/memory` to see all loaded memory files, or
+1. Check the workdir slug matches your cwd. On Windows, the slug uses one `-`
+   per backslash, so `C:\Users\You\work\proj` becomes `C--Users-You-work-proj`.
+2. Confirm `MEMORY.md` exists in that directory (`Get-ChildItem` it).
+3. Inside Claude Code, run `/memory` to see all loaded memory files, or
    `/context` to see their token cost.
 
 ## Step 9 — Set an artifact location convention

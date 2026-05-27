@@ -18,6 +18,11 @@
             "type": "command",
             "command": "python \"${CLAUDE_HOME}/hooks/block-trunk-commit.py\"",
             "if": "Bash(git *)"
+          },
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_HOME}/hooks/block-oauth-leak.py\"",
+            "if": "Bash(git commit *) || Bash(git push *)"
           }
         ]
       }
