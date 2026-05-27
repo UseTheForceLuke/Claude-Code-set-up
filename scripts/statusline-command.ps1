@@ -8,7 +8,7 @@ hook) and emits a one-line status string suitable for display in the
 terminal footer.
 
 Output fields:
-  dir           Leaf folder name from workspace.current_dir (e.g. "Platform")
+  dir           Full path from workspace.current_dir (e.g. "C:\Users\You\work\proj")
   session-id    Full UUID from the session_id field
   NN% ctx       Percent of context window used (rounded)
   NNNk left     Tokens remaining (rounded to thousands)
@@ -26,10 +26,10 @@ $input_json = $input | Out-String
 $data = $null
 try { $data = $input_json | ConvertFrom-Json } catch { }
 
-# --- Workspace dir (leaf folder name only) ---
+# --- Workspace dir (full path) ---
 $dir_str = "?"
 if ($data -and $data.workspace -and $data.workspace.current_dir) {
-    $dir_str = Split-Path -Leaf ([string]$data.workspace.current_dir)
+    $dir_str = [string]$data.workspace.current_dir
 }
 
 # --- Session ID (full UUID) ---

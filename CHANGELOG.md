@@ -5,7 +5,7 @@ All notable changes to this portable Claude Code setup repo.
 ## Unreleased
 
 - SETUP.md: add Step 10 documenting the VS Code workspace + terminal split-launch pattern (open VS Code at project root for broad file view, but auto-land the integrated terminal in the main code repo so Claude launches with the right CLAUDE.md/.claude/memory)
-- statusline-command.ps1: add leaf folder name to output (workspace.current_dir). New format: `<dir> | session-id | NN% ctx | NNNk left`. Useful when running multiple Claude Code sessions in different dirs - at-a-glance which cwd you're in.
+- statusline-command.ps1: add full cwd path to output (workspace.current_dir). New format: `<full-cwd> | session-id | NN% ctx | NNNk left`. Useful when running multiple Claude Code sessions - at-a-glance which dir you're in.
 - test.ps1: updated check #7 to validate the new dir field appears in fallback output
 
 - Add `SECURITY.md` documenting what install/uninstall/hooks do and how to audit
