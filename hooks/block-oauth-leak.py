@@ -76,7 +76,7 @@ def main() -> int:
     if JWT_RE.search(diff):
         violations.append(f"JWT-shaped string (eyJ... prefix) found in {diff_label}")
 
-    # File-name check — use the same diff range we already scanned
+    # File-name check - use the same diff range we already scanned
     try:
         if is_commit:
             name_args = ["git", "diff", "--cached", "--name-only"]
