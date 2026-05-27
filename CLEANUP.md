@@ -404,6 +404,72 @@ prompt should include your `MEMORY.md` content. If it doesn't show up:
    `C:\Users\You\work\proj` becomes `C--Users-You-work-proj`.
 3. Confirm `MEMORY.md` exists in that directory (`Get-ChildItem` it).
 
+## Step 9 — Set an artifact location convention
+
+Claude tends to write scratch files (analysis docs, draft scripts, intermediate
+outputs, handoff dumps) wherever the conversation happens to be. Over months,
+this scatters generated files across your tracked repos.
+
+Fix: declare a single, dedicated artifact folder outside any tracked repo, and
+add a memory file pinning the rule.
+
+### The folder
+
+```powershell
+New-Item -ItemType Directory -Force "$env:USERPROFILE\work\<project>\claude-artifacts"
+```
+
+Sits at the project root, parallel to tracked repos. Not git-tracked itself.
+
+### The memory file
+
+`feedback_artifact_location.md` in your project memory dir:
+
+```markdown
+---
+name: feedback-artifact-location
+description: All Claude-generated artifacts go to <project>/claude-artifacts/ regardless of launch dir
+metadata:
+  type: feedback
+---
+
+Default location for all Claude-generated artifacts:
+`<project>/claude-artifacts/`. Applies regardless of which subdirectory
+Claude Code was launched from.
+
+Applies to: scratch scripts, draft docs, intermediate JSON/CSV, handoff
+context dumps, milestone bundles, anything `_*` prefixed.
+
+Does NOT apply to: real code changes in tracked repos, skill-internal
+working dirs, files the user names a specific path for.
+
+How to apply: when asked to "save the analysis", "write a draft",
+"dump context", default the target path to
+`<project>/claude-artifacts/<descriptive-name>.md`.
+```
+
+### Workdir-slug gotcha
+
+Memory at `~/.claude/projects/<slug>/memory/` only loads when cwd matches
+the slug. If you launch Claude Code from a deeper path
+(`<project>/<subrepo>/`), the slug differs and the memory won't auto-load.
+
+Two ways to handle:
+
+1. **Always launch from project root** — single memory dir, no drift
+2. **Mirror the memory to deeper-path slugs** — files duplicated, drift risk
+   when one copy gets edited
+
+The first is cleaner if you can stick to it. If your shell habits push you
+into subdirs (e.g., `cd` directly into a service repo), mirror and accept
+the manual re-sync.
+
+### Why this matters
+
+In one real cleanup, this convention would have prevented ~400 scratch files
+accumulating at the project root over a multi-month spike. Generated files
+mixed with real artifacts, hard to triage what to keep vs delete.
+
 ## Real numbers from one cleanup
 
 | Before | After |
