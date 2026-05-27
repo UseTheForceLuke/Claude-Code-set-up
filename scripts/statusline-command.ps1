@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Claude Code statusLine command - prints "session-id | NN% ctx | NNNk left".
+Claude Code statusLine command - prints "<dir> | session-id | NN% ctx | NNNk left".
 
 .DESCRIPTION
 Reads session state JSON from stdin (provided by Claude Code's statusLine
@@ -8,6 +8,7 @@ hook) and emits a one-line status string suitable for display in the
 terminal footer.
 
 Output fields:
+  dir           Leaf folder name from workspace.current_dir (e.g. "Platform")
   session-id    Full UUID from the session_id field
   NN% ctx       Percent of context window used (rounded)
   NNNk left     Tokens remaining (rounded to thousands)
@@ -24,6 +25,12 @@ $input_json = $input | Out-String
 
 $data = $null
 try { $data = $input_json | ConvertFrom-Json } catch { }
+
+# --- Workspace dir (leaf folder name only) ---
+$dir_str = "?"
+if ($data -and $data.workspace -and $data.workspace.current_dir) {
+    $dir_str = Split-Path -Leaf ([string]$data.workspace.current_dir)
+}
 
 # --- Session ID (full UUID) ---
 $session_id = "--------"
@@ -43,4 +50,4 @@ if ($data -and $data.context_window) {
 $ctx_pct_str   = if ($null -ne $used_pct)    { "${used_pct}% ctx" }     else { "?% ctx" }
 $remaining_str = if ($null -ne $remaining_k) { "${remaining_k}k left" } else { "?k left" }
 
-"$session_id | $ctx_pct_str | $remaining_str"
+"$dir_str | $session_id | $ctx_pct_str | $remaining_str"

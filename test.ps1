@@ -162,9 +162,9 @@ Assert ($help1 -match "Bootstrap Claude-Code-set-up") "install.ps1 exposes SYNOP
 $help2 = Get-Help "$RepoRoot\uninstall.ps1" 2>&1 | Out-String
 Assert ($help2 -match "Remove files this repo installed") "uninstall.ps1 exposes SYNOPSIS via Get-Help"
 
-# 7. statusline-command.ps1 runs and produces output (even fallback)
+# 7. statusline-command.ps1 runs and produces output (fallback path includes the dir field)
 $statusOut = & powershell -NoProfile -Command "echo '{}' | & '$RepoRoot\scripts\statusline-command.ps1'" 2>&1
-Assert ($statusOut -match "\| \?% ctx \| \?k left") "statusline-command.ps1 emits output (fallback path)"
+Assert ($statusOut -match "^\? \| -+ \| \?% ctx \| \?k left") "statusline-command.ps1 emits output (fallback path with dir field)"
 
 # 8. install.ps1 pre-flight fires when a required source file is missing
 $tmpRepo = Join-Path $env:TEMP "cc-setup-test-installpf-$(Get-Random)"
