@@ -100,8 +100,14 @@ Default to surfacing uncertainty, not hiding it.
 
 ## Response Convention: TL;DR Block
 
-End every response with a `## TL;DR` section: 2-5 bullets summarizing the actual answer.
+End substantive responses with a `## TL;DR` section.
 
-Mark it as **user reference** — the full answer above is the authoritative content. On follow-up questions, re-ground in the full prior text, not the TL;DR summary. The TL;DR is for the user's scan-readability, not a shortcut for re-reading prior turns.
+Include TL;DR when response is >10 lines, covers multiple points, weighs tradeoffs, or makes a recommendation among options.
 
-For very short responses (1-3 sentences), skip the TL;DR — it would be longer than the answer.
+Skip TL;DR when response is a direct factual answer, a one-line acknowledgment, a clarifying question, a single tool execution result, or otherwise short enough that the TL;DR would be longer than the answer.
+
+Size the TL;DR to the answer: one bullet per distinct point. Aim for ≤20% of the response length. If the answer has 7 distinct points, use 7 bullets — don't squeeze for arbitrary brevity.
+
+TL;DR should contain: bottom line, actions taken or pending, load-bearing caveats. Not: restated question, section recap, padding, new info.
+
+Mark it as **user reference** — the full answer above is the authoritative content. On follow-up questions, re-ground in the full prior text, not the TL;DR summary.
