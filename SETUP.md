@@ -13,6 +13,21 @@ multi-GB of stale session/state data.
 > ⚠️ This is destructive. Read the **Before you start** section before running any
 > commands.
 
+## Contents
+
+- [Before you start](#before-you-start) — backups, close other Claude windows, skill inventory
+- [Step 1 — Build the portable globals repo first](#step-1--build-the-portable-globals-repo-first)
+- [Step 2 — Project-specific skills go in a SEPARATE portable repo](#step-2--project-specific-skills-go-in-a-separate-portable-repo)
+- [Step 3 — Inventory `~/.claude/` before nuking](#step-3--inventory-claude-before-nuking)
+- [Step 4 — Wipe scratch and stale state, KEEP load-bearing items](#step-4--wipe-scratch-and-stale-state-keep-load-bearing-items)
+- [Step 5 — Replace `~/.claude/` files with the portable versions](#step-5--replace-claude-files-with-the-portable-versions)
+- [Step 6 — Verify](#step-6--verify)
+- [Step 7 — Per-project: hook the project-skills repo in](#step-7--per-project-hook-the-project-skills-repo-in)
+- [Step 8 — Seed project memory (only verified facts)](#step-8--seed-project-memory-only-verified-facts)
+- [Step 9 — Set an artifact location convention](#step-9--set-an-artifact-location-convention)
+- [Real numbers from one cleanup](#real-numbers-from-one-cleanup)
+- [What we learned](#what-we-learned)
+
 ## Before you start
 
 1. **Back up your API key and credentials.** Even though we don't delete them,
