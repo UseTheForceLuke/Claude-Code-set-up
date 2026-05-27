@@ -97,3 +97,11 @@ If you can't be sure something worked, say so explicitly.
 "Tests pass" is wrong if you skipped any.
 "Feature works" is wrong if you didn't verify the edge case I asked about.
 Default to surfacing uncertainty, not hiding it.
+
+## Response Convention: TL;DR Block
+
+End every response with a `## TL;DR` section: 2-5 bullets summarizing the actual answer.
+
+Mark it as **user reference** — the full answer above is the authoritative content. On follow-up questions, re-ground in the full prior text, not the TL;DR summary. The TL;DR is for the user's scan-readability, not a shortcut for re-reading prior turns.
+
+For very short responses (1-3 sentences), skip the TL;DR — it would be longer than the answer.
