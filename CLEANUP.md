@@ -242,21 +242,107 @@ Restart Claude Code. The skills list in your first system reminder should
 **shrink** dramatically — that's the win. Project-specific skills now load only
 when you `cd` into the project that has them.
 
-## Step 7 — Per-project: symlink the project-skills repo in
+## Step 7 — Per-project: hook the project-skills repo in
 
-For each project that needs its own skills:
+For each project that needs its own skills, hold them in a sibling repo
+(e.g. `~/work/<project>-skills/`) and pull skills into the project's
+`.claude/` folder as needed.
 
-```powershell
-$projectRoot = "$env:USERPROFILE\work\<project>"
-$skillsRepo  = "$env:USERPROFILE\<project>-skills"
+### Layout
 
-# Symlinks need Windows Developer Mode on, or run as Administrator
-New-Item -ItemType SymbolicLink "$projectRoot\.claude\skills"   -Target "$skillsRepo\skills"
-New-Item -ItemType SymbolicLink "$projectRoot\.claude\commands" -Target "$skillsRepo\commands"
-New-Item -ItemType SymbolicLink "$projectRoot\.claude\agents"   -Target "$skillsRepo\agents"
+```
+~/work/
+├── <project>/                       The project itself (Platform, app code, etc.)
+│   └── .claude/
+│       ├── skills/                  Skills available when you cd into <project>
+│       │   ├── deploy-db/
+│       │   └── prod-read-sql/
+│       ├── commands/                /slash-commands for this project
+│       └── agents/                  Subagents for this project
+│
+└── <project>-skills/                The portable repo with ALL skills (source of truth)
+    ├── skills/                      Master list — keep more than you've activated
+    │   ├── deploy-db/
+    │   ├── handoff/
+    │   ├── local-bootstrapper/
+    │   ├── prod-read-sql/
+    │   └── stale-branches/
+    ├── commands/
+    └── agents/
 ```
 
-Without symlinks, copy instead and re-copy after each `git pull`.
+The idea: **`<project>-skills/` holds everything**. The project's `.claude/`
+holds **only what you actually use**. Different machines or branches can
+activate different subsets.
+
+### Option A — Copy individual skills (simplest, no Windows prereqs)
+
+Pull skills in one at a time. Works without Developer Mode or admin:
+
+```powershell
+$project    = "$env:USERPROFILE\work\<project>"
+$skillsRepo = "$env:USERPROFILE\work\<project>-skills"
+
+# Ensure target dirs exist
+New-Item -ItemType Directory -Force "$project\.claude\skills"   | Out-Null
+New-Item -ItemType Directory -Force "$project\.claude\commands" | Out-Null
+New-Item -ItemType Directory -Force "$project\.claude\agents"   | Out-Null
+
+# Copy one skill in
+Copy-Item -Recurse "$skillsRepo\skills\prod-read-sql" "$project\.claude\skills\"
+
+# Copy a slash command
+Copy-Item "$skillsRepo\commands\deploy-db.md" "$project\.claude\commands\"
+```
+
+**Trade-off:** edits in `<project>-skills/` aren't reflected in `<project>/.claude/`
+until you re-copy. After `git pull` on the skills repo, refresh the copies you
+care about.
+
+### Option B — Symlink whole folders (needs Developer Mode or admin)
+
+If you want live two-way sync:
+
+```powershell
+# One-time: enable Developer Mode in Windows Settings -> Privacy & security
+# -> For developers, OR run PowerShell as Administrator
+
+$project    = "$env:USERPROFILE\work\<project>"
+$skillsRepo = "$env:USERPROFILE\work\<project>-skills"
+
+New-Item -ItemType SymbolicLink "$project\.claude\skills"   -Target "$skillsRepo\skills"
+New-Item -ItemType SymbolicLink "$project\.claude\commands" -Target "$skillsRepo\commands"
+New-Item -ItemType SymbolicLink "$project\.claude\agents"   -Target "$skillsRepo\agents"
+```
+
+All skills in the repo become available immediately. Edits sync both ways.
+
+### Verify
+
+After either approach, the skill loads only when you `cd <project>`:
+
+```powershell
+Get-ChildItem "$project\.claude\skills"
+# Should list the skills you copied/symlinked.
+
+# Inside Claude Code, the first system reminder will include these
+# skills only when your working directory is under <project>.
+```
+
+### Real example (this repo's own workflow)
+
+```powershell
+# Setup once: clone the portable skill repo
+git clone <your-private-url> $env:USERPROFILE\work\escribe-skills
+
+# Per-skill activation: pull prod-read-sql into the eScribe project
+Copy-Item -Recurse `
+  $env:USERPROFILE\work\escribe-skills\skills\prod-read-sql `
+  $env:USERPROFILE\work\eScribe\.claude\skills\
+
+# Now /prod-read-sql is available in Claude Code only when cd'd into eScribe.
+# Other projects don't see it; the token budget stays small there.
+```
 
 ## Real numbers from one cleanup
 
