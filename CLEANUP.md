@@ -351,7 +351,25 @@ Auto-memory lives at `~/.claude/projects/<workdir-slug>/memory/` and auto-loads
 when their MEMORY.md index entry is referenced.
 
 The workdir slug is the cwd with separators replaced by `-`. For
-`C:\Users\Andrey\work\<project>`, the slug is `c--Users-Andrey-work-<project>`.
+`C:\Users\You\work\<project>`, the slug is `c--Users-You-work-<project>`.
+
+### Directory layout
+
+```
+~/.claude/projects/c--Users-You-work-<project>/
+└── memory/
+    ├── MEMORY.md                          Index — auto-loaded every session
+    │                                      Keep under ~10 lines
+    │
+    ├── user_role.md                       type: user
+    │                                      Who you are, primary dir, stack
+    │
+    ├── reference_<topic>.md               type: reference
+    │                                      IDs, endpoints, pipeline numbers
+    │
+    └── feedback_<topic>.md                type: feedback
+                                           Conventions, workflow rules
+```
 
 ### What to seed
 
@@ -374,8 +392,8 @@ Useful categories:
 
 - **Inferred preferences.** "User prefers terse responses" based on two `tldr?`
   asks is fragile — the same user wants depth on a different topic next week.
-- **Conventions you haven't read.** Citing `Platform/CLAUDE.md says X` without
-  reading current `Platform/CLAUDE.md` violates Karpathy Rule 8 ("Read before
+- **Conventions you haven't read.** Citing `<project>/CLAUDE.md says X` without
+  reading current `<project>/CLAUDE.md` violates Karpathy Rule 8 ("Read before
   you write"). Stale citations are worse than no citations.
 - **Project initiatives.** Memory entries that name a campaign / spike / sprint
   decay within weeks; they cost tokens long after the work shipped.
@@ -383,16 +401,128 @@ Useful categories:
   already documents PR conventions in `<repo>/CLAUDE.md`, the memory entry
   duplicates without adding value — and rots independently.
 
-### Example MEMORY.md (anonymized)
+### Example: MEMORY.md (the index)
 
 ```markdown
-- [User role](user_role.md) — Backend dev on Platform team; works in Platform/apis and experiment.LocalBootstrapper
+- [User role](user_role.md) — Backend dev on the team; works in <project>/apis
 - [PR workflow](feedback_pr_workflow.md) — Use the team's pr-create skill; never raw `az repos pr create`
-- [Backend C# style](feedback_backend_style.md) — `_underscore` fields, AAA tests, SonarCloud rules
-- [ADO reference](reference_ado.md) — Org, project id, repo id, tenant SQL pipeline id, PR-threads endpoint
+- [Backend style](feedback_backend_style.md) — `_underscore` fields, AAA tests, SonarCloud rules
+- [ADO reference](reference_ado.md) — Org, project id, repo id, pipeline ids, PR-threads endpoint
+- [Artifact location](feedback_artifact_location.md) — All generated files go to <project>/claude-artifacts/
 ```
 
-Keep the index under ~10 lines so it always fits in context.
+### Example: `user_role.md` (type: user)
+
+```markdown
+---
+name: user-role
+description: Backend developer on the <team> team; primary stack is C# / .NET 8 in <project>/apis
+metadata:
+  type: user
+---
+
+Backend developer on the <team> team.
+
+- Primary working directory: `<project>/apis/` — C# / .NET 8.
+- Local testing path: `<project>/experiment.LocalBootstrapper/` — separate
+  .NET solution with an app host. When the user says "spin it up locally"
+  or "local test", default to this path before assuming docker/compose.
+
+How to apply: tailor explanations to a backend perspective; don't over-explain
+dotnet CLI, LINQ, or EF Core basics; for "local run" requests default to
+LocalBootstrapper.
+```
+
+### Example: `reference_ado.md` (type: reference)
+
+```markdown
+---
+name: reference-ado
+description: Azure DevOps coordinates — org URL, project id, repo id, pipeline ids, PR-threads endpoint
+metadata:
+  type: reference
+---
+
+Azure DevOps coordinates. Pull from here rather than re-grepping the project's CLAUDE.md.
+
+- Org: `https://dev.azure.com/<org>`
+- Project: `<project-name>` (id: `<project-guid>`)
+- Backend repo id: `<repo-guid>`
+- Tenant read-only SQL pipeline: `definitionId=<id>`
+
+PR threads / comments endpoint (one call returns reviewer comments +
+SonarCloud annotations + policy status):
+
+`az devops invoke --area git --resource pullRequestThreads --route-parameters project=<project-guid> repositoryId=<repo-guid> pullRequestId=<PR_ID> --api-version 7.1`
+
+Verification note: ids captured YYYY-MM-DD from `<project>/CLAUDE.md`.
+If an API call returns 404 / "project not found", re-check these against
+`az devops project show --project <project-name>` before assuming memory is wrong.
+```
+
+### Example: `feedback_pr_workflow.md` (type: feedback)
+
+```markdown
+---
+name: feedback-pr-workflow
+description: Always create PRs via the team's pr-create skill; never raw `az repos pr create`
+metadata:
+  type: feedback
+---
+
+Always create pull requests by invoking the `<team>:pr-create` skill via the
+Skill tool. Never call `az repos pr create` directly.
+
+For retrieving PR comments/threads/SonarCloud/policy status, use:
+
+`az devops invoke --area git --resource pullRequestThreads ...`
+
+(see [[reference-ado]] for the full command)
+
+Why: documented policy in `<project>/CLAUDE.md`. The pr-create skill wraps
+team conventions (templates, reviewers, work-item linking) that raw CLI skips.
+
+How to apply: any time the user asks to create a PR, open a PR, push for
+review, or fetch PR comments for the project. If the skill is not installed,
+advise installing per the team's plugin docs rather than falling through to
+the raw CLI.
+
+Related: [[reference-ado]].
+```
+
+### Example: `feedback_backend_style.md` (type: feedback)
+
+```markdown
+---
+name: feedback-backend-style
+description: C# conventions — _underscore fields, AAA tests, Method_Given_Should naming, SonarCloud rules
+metadata:
+  type: feedback
+---
+
+C# coding conventions for `<project>/apis/`:
+
+Naming & layout:
+- Class fields: `_underscorePrefix` (e.g. `_userRepository`)
+- Locals/parameters: `camelCase`
+- Methods/classes/types: `PascalCase`
+- Interfaces in the same file as the implementing class, after `using` block
+- Prefer early returns to deep nesting
+
+Tests:
+- AAA pattern (Arrange / Act / Assert), explicitly delimited
+- Test naming: `<MethodName>_Given<scenario>_Should<expectedOutcome>`
+- Mock externals with Moq
+
+SonarCloud rules:
+- `collection.Count == 0` instead of `!collection.Any()`
+- Mark static members `static` explicitly
+
+Why: documented in `<project>/CLAUDE.md` and enforced by SonarCloud at CI.
+
+How to apply: any C# write/edit in `<project>/apis/`. Default to these
+conventions without being prompted.
+```
 
 ### Verification
 
@@ -403,6 +533,8 @@ prompt should include your `MEMORY.md` content. If it doesn't show up:
 2. On Windows, the slug uses one `-` per backslash, so
    `C:\Users\You\work\proj` becomes `C--Users-You-work-proj`.
 3. Confirm `MEMORY.md` exists in that directory (`Get-ChildItem` it).
+4. Inside Claude Code, run `/memory` to see all loaded memory files, or
+   `/context` to see their token cost.
 
 ## Step 9 — Set an artifact location convention
 
