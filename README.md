@@ -1,13 +1,43 @@
 # Claude-Code-set-up
 
-Portable Claude Code configuration. Global behavioral rules, a settings
-template, plus optional hook and statusline scripts you can wire in.
+Portable Claude Code configuration: global behavioral rules, a settings
+template, an OAuth-leak commit guard, a trunk-commit blocker, and a custom
+statusline. One repo, syncable across machines via git.
 
-For migrating an existing cluttered `~/.claude/` to a clean state, see
-[CLEANUP.md](CLEANUP.md) — a 9-step guide covering inventory, wipe, replace,
-per-project skills, project memory seeding, and artifact location convention.
+## Why this exists
+
+After months of Claude Code use, `~/.claude/` accumulates:
+
+- Hundreds of MB of stale session transcripts in `projects/`
+- Skill folders bundling `node_modules` and `.auth/` token caches
+- Dead `.ps1` hooks wired to deleted scripts
+- Stale auto-memory entries from finished campaigns
+- A `settings.json` with undocumented / fake keys silently ignored
+
+This repo is the **canonical clean state** after a real cleanup. The
+[SETUP.md](SETUP.md) guide walks through migrating from a cluttered
+`~/.claude/` to this layout — 9 steps, with real numbers from one cleanup
+(~1.5 GB → ~9 MB).
+
+## Quick install
+
+```powershell
+git clone https://github.com/UseTheForceLuke/Claude-Code-set-up $env:USERPROFILE\Claude-Code-set-up
+cd $env:USERPROFILE\Claude-Code-set-up
+.\install.ps1
+```
+
+The script copies `CLAUDE.md`, renders `settings.template.json` into
+`~/.claude/settings.json` with `${CLAUDE_HOME}` substituted, and copies
+`hooks/` + `scripts/`. It does NOT touch your API key, OAuth tokens, memory,
+or session transcripts.
+
+Use `.\install.ps1 -DryRun` to preview without writing.
+Use `.\install.ps1 -SkipSettings` to keep your existing `settings.json`.
 
 ## Layout
+
+This repo (what gets cloned):
 
 ```
 Claude-Code-set-up/
@@ -18,40 +48,50 @@ Claude-Code-set-up/
 │   └── block-oauth-leak.py        Blocks commits with JWTs, .auth/ files, credentials (opt-in)
 ├── scripts/
 │   └── statusline-command.ps1     Status line: session-id | %ctx | k-left
+├── install.ps1                    One-command bootstrap into ~/.claude/
 ├── .gitignore                     __pycache__, *.pyc, .DS_Store, Thumbs.db
 ├── README.md                      This file
-└── CLEANUP.md                     9-step migration guide
+└── SETUP.md                       9-step migration guide
 ```
 
-## Install on a new machine
+After `install.ps1` runs, your `~/.claude/` looks like:
 
-1. Clone:
-   ```powershell
-   git clone https://github.com/UseTheForceLuke/Claude-Code-set-up $env:USERPROFILE\Claude-Code-set-up
-   ```
+```
+~/.claude/
+├── config.json                    Anthropic API key (you provide)
+├── .credentials.json              OAuth tokens (Claude Code manages)
+├── CLAUDE.md                      ← copied from this repo
+├── settings.json                  ← rendered from settings.template.json
+├── hooks/                         ← copied from this repo
+│   ├── block-trunk-commit.py
+│   └── block-oauth-leak.py
+├── scripts/
+│   └── statusline-command.ps1     ← copied from this repo
+├── skills/                        EMPTY at user level (skills are per-project)
+├── agents/                        EMPTY
+├── commands/                      EMPTY
+└── projects/
+    └── <workdir-slug>/
+        └── memory/                ← auto-memory grows here as you work
+            ├── MEMORY.md          Index (auto-loaded every session)
+            ├── user_role.md       Who you are, primary dir, stack
+            ├── reference_<x>.md   IDs, endpoints, pipeline numbers
+            └── feedback_<x>.md    Conventions, workflow rules
+```
 
-2. Copy the rules:
-   ```powershell
-   Copy-Item $env:USERPROFILE\Claude-Code-set-up\CLAUDE.md $env:USERPROFILE\.claude\CLAUDE.md
-   ```
+Example `MEMORY.md` index (in a real project memory folder):
 
-3. Render settings (substitutes `${CLAUDE_HOME}` with the path to `~/.claude/`):
-   ```powershell
-   $claudeHome = "$env:USERPROFILE\.claude" -replace '\\', '/'
-   (Get-Content $env:USERPROFILE\Claude-Code-set-up\settings.template.json) `
-     -replace '\$\{CLAUDE_HOME\}', $claudeHome |
-     Set-Content $env:USERPROFILE\.claude\settings.json
-   ```
+```markdown
+- [User role](user_role.md) — Backend dev; works in <project>/apis
+- [PR workflow](feedback_pr_workflow.md) — Use the team's pr-create skill; never raw `az repos pr create`
+- [Backend style](feedback_backend_style.md) — `_underscore` fields, AAA tests, SonarCloud rules
+- [ADO reference](reference_ado.md) — Org, project id, repo id, pipeline 285, PR-threads endpoint
+- [Artifact location](feedback_artifact_location.md) — Generated files go to <project>/claude-artifacts/
+```
 
-4. Copy hooks and scripts the template references:
-   ```powershell
-   New-Item -ItemType Directory -Force $env:USERPROFILE\.claude\hooks   | Out-Null
-   New-Item -ItemType Directory -Force $env:USERPROFILE\.claude\scripts | Out-Null
-   Copy-Item $env:USERPROFILE\Claude-Code-set-up\hooks\*   $env:USERPROFILE\.claude\hooks\
-   Copy-Item $env:USERPROFILE\Claude-Code-set-up\scripts\* $env:USERPROFILE\.claude\scripts\
-   ```
-
-5. Anthropic API key goes in `~/.claude/config.json` (not in this repo).
+Each linked file has YAML frontmatter (`name`, `description`, `metadata.type`)
+plus the actual content. See [SETUP.md Step 8](SETUP.md) for full examples
+of each type (`user`, `reference`, `feedback`).
 
 ## What lives per-machine (NOT in this repo)
 
@@ -125,7 +165,7 @@ demand), so the saving per connector is modest. Trimming 15+ unused ones to
 
 This repo doesn't ship skills — they're project-coupled. For per-project
 skills (loads only when you `cd` into that project), see **Step 7** of
-[CLEANUP.md](CLEANUP.md) for the project-skills repo pattern (`<project>-skills/`
+[SETUP.md](SETUP.md) for the project-skills repo pattern (`<project>-skills/`
 sibling repo + copy or symlink into `<project>/.claude/skills/`).
 
 **Rule of thumb:** if a skill mentions a project name, environment, employee,
@@ -136,7 +176,7 @@ even when irrelevant.
 
 Per-project auto-memory at `~/.claude/projects/<workdir-slug>/memory/`
 auto-loads `MEMORY.md` into every session in that workdir. See **Step 8** of
-[CLEANUP.md](CLEANUP.md) for:
+[SETUP.md](SETUP.md) for:
 
 - Directory layout with `MEMORY.md` index + topic files
 - What to seed (verified facts) vs not (inferred preferences, stale citations)
@@ -147,5 +187,9 @@ auto-loads `MEMORY.md` into every session in that workdir. See **Step 8** of
 
 Claude tends to write scratch files wherever the conversation is. Over months
 this scatters generated files across tracked repos. **Step 9** of
-[CLEANUP.md](CLEANUP.md) covers declaring a dedicated `<project>/claude-artifacts/`
+[SETUP.md](SETUP.md) covers declaring a dedicated `<project>/claude-artifacts/`
 folder and pinning the rule via memory.
+
+## License
+
+MIT — see [LICENSE](LICENSE). Use this, fork it, adapt it to your stack.

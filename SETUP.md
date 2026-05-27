@@ -1,9 +1,14 @@
-# Cleanup: from cluttered `~/.claude/` to a globals-only portable setup
+# Setup: from cluttered `~/.claude/` to a globals-only portable Claude Code
 
-A real-world record of how to shrink an over-grown Claude Code configuration to
-a minimal, portable globals-only state. Run this when your `~/.claude/`
+A 9-step migration guide. The first half cleans up an over-grown `~/.claude/`;
+the second half wires this repo in, adds project-specific skills, seeds memory,
+and pins an artifact-location convention. Run this when your `~/.claude/`
 has accumulated old skills, dead hooks, secrets, project-specific tools, and
 multi-GB of stale session/state data.
+
+> **Tip:** if you're starting fresh on a new machine instead of cleaning up an
+> existing setup, jump to **Step 5** (replace `~/.claude/` files with the
+> portable versions) — or just run `install.ps1` from this repo's root.
 
 > ⚠️ This is destructive. Read the **Before you start** section before running any
 > commands.
