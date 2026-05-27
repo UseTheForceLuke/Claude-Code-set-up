@@ -1,4 +1,4 @@
-# install.ps1 — bootstrap Claude-Code-set-up into ~/.claude/
+# install.ps1 - bootstrap Claude-Code-set-up into ~/.claude/
 #
 # Usage:
 #   .\install.ps1                  Install everything (CLAUDE.md, settings, hooks, scripts)
@@ -40,7 +40,7 @@ if (-not (Test-Path $ClaudeHome)) {
   if ($DryRun) {
     Write-Host "==> ~/.claude/ doesn't exist (would create)" -ForegroundColor Yellow
   } else {
-    Write-Host "==> ~/.claude/ doesn't exist — creating it" -ForegroundColor Cyan
+    Write-Host "==> ~/.claude/ doesn't exist - creating it" -ForegroundColor Cyan
     New-Item -ItemType Directory -Force $ClaudeHome | Out-Null
   }
 }
@@ -51,7 +51,7 @@ Copy-OrDryRun "$RepoRoot\CLAUDE.md" "$ClaudeHome\CLAUDE.md"
 
 # --- 2. settings.json (rendered from template) ---
 if ($SkipSettings) {
-  Write-Step "Skipping settings.json (--SkipSettings)"
+  Write-Step "Skipping settings.json (-SkipSettings flag set)"
 } else {
   Write-Step "Render settings.template.json -> ~/.claude/settings.json"
   $claudeHomeUnix = $ClaudeHome -replace '\\', '/'
@@ -98,7 +98,7 @@ if (-not $DryRun) {
       $null = Get-Content $settingsPath -Raw | ConvertFrom-Json
       Write-Host "    settings.json: valid JSON" -ForegroundColor Green
     } catch {
-      Write-Host "    settings.json: INVALID JSON — $_" -ForegroundColor Red
+      Write-Host "    settings.json: INVALID JSON - $_" -ForegroundColor Red
     }
   }
 }
@@ -106,5 +106,5 @@ if (-not $DryRun) {
 Write-Host ""
 Write-Host "Done. Restart Claude Code to pick up the new settings." -ForegroundColor Green
 if ($DryRun) {
-  Write-Host "(dry run — nothing was written)" -ForegroundColor Yellow
+  Write-Host "(dry run - nothing was written)" -ForegroundColor Yellow
 }

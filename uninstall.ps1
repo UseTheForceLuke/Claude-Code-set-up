@@ -1,4 +1,4 @@
-# uninstall.ps1 — remove files this repo installed from ~/.claude/
+# uninstall.ps1 - remove files this repo installed from ~/.claude/
 #
 # Usage:
 #   .\uninstall.ps1              Remove repo-managed files (prompts before each)
@@ -64,7 +64,7 @@ foreach ($t in $targets) {
   }
 }
 
-# settings.json is sensitive — only remove if it matches what install.ps1 would
+# settings.json is sensitive - only remove if it matches what install.ps1 would
 # have produced. Otherwise the user has customized it and we shouldn't touch it.
 $settingsPath = "$ClaudeHome\settings.json"
 if (Test-Path $settingsPath) {
@@ -80,7 +80,7 @@ if (Test-Path $settingsPath) {
     }
   } else {
     Write-Host "    skip (customized): $settingsPath" -ForegroundColor Yellow
-    Write-Host "      your settings.json differs from the rendered template — leaving alone." -ForegroundColor DarkYellow
+    Write-Host "      your settings.json differs from the rendered template - leaving alone." -ForegroundColor DarkYellow
     Write-Host "      delete manually if you want it gone." -ForegroundColor DarkYellow
   }
 }
@@ -100,5 +100,5 @@ foreach ($d in @("$ClaudeHome\hooks", "$ClaudeHome\scripts")) {
 Write-Host ""
 Write-Host "Done. Your API key, credentials, memory, and skills are untouched." -ForegroundColor Green
 if ($DryRun) {
-  Write-Host "(dry run — nothing was removed)" -ForegroundColor Yellow
+  Write-Host "(dry run - nothing was removed)" -ForegroundColor Yellow
 }
