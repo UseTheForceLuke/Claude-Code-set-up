@@ -59,17 +59,25 @@ Claude-Code-set-up/
 
 ## What's in settings.template.json
 
-Configures:
-- `model: opus[1m]` — Opus with 1M context window. On Max/Team Premium plans this is the default anyway, but explicit is fine.
-- `effortLevel: xhigh` — Maximum effort reasoning on Opus 4.7. Also the default; explicit is documentation.
-- `permissions.defaultMode: auto` — Auto-approves tool calls (research preview).
-- `permissions.bash: allow` — Intended to allow all Bash; note this may not be the documented syntax. Documented form is `"permissions": {"allow": ["Bash"]}`.
-- `hooks.PreToolUse` — Wires `block-trunk-commit.py` for git commands.
-- `statusLine` — Wires `statusline-command.ps1`.
-- `enabledPlugins.frontend-design` — Enables the frontend-design plugin.
-- `alwaysThinkingEnabled: false`, `autoDreamEnabled: true`, `skipDangerousModePermissionPrompt: true`, `skipAutoPermissionPrompt: true` — assorted UX toggles.
+- `model: opus[1m]` — Opus with 1M context window
+- `effortLevel: xhigh` — max documented effort level (default on Opus 4.7)
+- `permissions.defaultMode: auto` + `allow: ["Bash"]` — auto-approve tool calls + pre-approve all Bash
+- `hooks.PreToolUse` — wires `block-trunk-commit.py` for git commands
+- `statusLine` — wires `statusline-command.ps1`
+- `enabledPlugins.frontend-design` — UI/UX design plugin
+- `skipDangerousModePermissionPrompt: true` — skip the bypass-mode confirmation
 
-Drop any of these to revert that piece to Claude Code's built-in default.
+Drop any key to revert that piece to Claude Code's built-in default.
+
+## Trim MCP connectors
+
+Account-level MCP connectors (Datadog, ADO, Slack, Notion, etc.) load tool
+definitions into context on every turn. Disconnect ones you don't use at
+[claude.ai/settings/connectors](https://claude.ai/settings/connectors).
+
+Most servers use deferred loading (name only in context, schema fetched on
+demand), so the saving per connector is modest. Trimming 15+ unused ones to
+3-4 active ones is still worth a few thousand tokens per turn.
 
 ## Adding project-specific skills
 
