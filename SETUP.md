@@ -25,6 +25,7 @@ multi-GB of stale session/state data.
 - [Step 7 — Per-project: hook the project-skills repo in](#step-7--per-project-hook-the-project-skills-repo-in)
 - [Step 8 — Seed project memory (only verified facts)](#step-8--seed-project-memory-only-verified-facts)
 - [Step 9 — Set an artifact location convention](#step-9--set-an-artifact-location-convention)
+- [Step 10 — VS Code workspace + terminal launch dir](#step-10---vs-code-workspace--terminal-launch-dir-split-pattern)
 - [Real numbers from one cleanup](#real-numbers-from-one-cleanup)
 - [What we learned](#what-we-learned)
 
@@ -642,6 +643,51 @@ the manual re-sync.
 In one real cleanup, this convention would have prevented ~400 scratch files
 accumulating at the project root over a multi-month spike. Generated files
 mixed with real artifacts, hard to triage what to keep vs delete.
+
+## Step 10 - VS Code workspace + terminal launch dir (split pattern)
+
+When the project root holds several sibling repos but Claude's most useful
+context lives inside one of them (the main code repo with the team's
+`CLAUDE.md`, `.claude/agents`, etc.), the cleanest setup is to **split where
+VS Code opens from where Claude launches**:
+
+- **VS Code folder**: project root (broad file explorer - sees all sibling
+  repos at once)
+- **Claude Code launch dir**: the main code repo (narrow, high-quality
+  context - team `CLAUDE.md` auto-loads, team `.claude/` loads, project memory
+  loads)
+
+### Config
+
+Drop a `.vscode/settings.json` in the project root that points the
+integrated terminal cwd at the main repo:
+
+```json
+{
+  "terminal.integrated.cwd": "${workspaceFolder}/<main-repo>",
+  "terminal.integrated.defaultProfile.windows": "PowerShell"
+}
+```
+
+Now: open VS Code at the project root, `Ctrl+`` for a new integrated terminal,
+it lands inside `<main-repo>/`, run `claude` - the right `CLAUDE.md` /
+`.claude/` / memory all auto-load.
+
+### Tradeoffs
+
+- The memory dir is tied to the launch slug (`c--Users-You-work-<project>-<main-repo>`),
+  not to the VS Code workspace. Pick one launch dir as primary and stick with it,
+  or accept manual sync across multiple memory dirs.
+- Personal skills at the project-root `.claude/skills/` don't load when launched
+  from a deeper subdir. Either move them into `<main-repo>/.claude/skills/` (if
+  you control that .claude/), or open a second terminal in the project root for
+  sessions that need them.
+
+### When to override
+
+`cd ..` in the integrated terminal moves it back to the project root for one
+session - useful for cross-repo greps. Future new terminals still land at the
+configured `terminal.integrated.cwd`.
 
 ## Real numbers from one cleanup
 

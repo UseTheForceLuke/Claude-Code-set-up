@@ -4,6 +4,8 @@ All notable changes to this portable Claude Code setup repo.
 
 ## Unreleased
 
+- SETUP.md: add Step 10 documenting the VS Code workspace + terminal split-launch pattern (open VS Code at project root for broad file view, but auto-land the integrated terminal in the main code repo so Claude launches with the right CLAUDE.md/.claude/memory)
+
 - Add `SECURITY.md` documenting what install/uninstall/hooks do and how to audit
 - Add `CHANGELOG.md` (this file)
 - Add `.github/PULL_REQUEST_TEMPLATE.md` with secret-sweep checklist
