@@ -1,3 +1,11 @@
+# Claude Code — Global Rules
+
+<!--
+This file lives at ~/.claude/CLAUDE.md and is loaded into every Claude Code
+session's context. Source of truth:
+https://github.com/UseTheForceLuke/Claude-Code-set-up
+-->
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**

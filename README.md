@@ -19,7 +19,7 @@ This repo is the **canonical clean state** after a real cleanup. The
 `~/.claude/` to this layout — 9 steps, with real numbers from one cleanup
 (~1.5 GB → ~9 MB).
 
-## Quick install
+## Quick install (Windows)
 
 ```powershell
 git clone https://github.com/UseTheForceLuke/Claude-Code-set-up $env:USERPROFILE\Claude-Code-set-up
@@ -32,8 +32,40 @@ The script copies `CLAUDE.md`, renders `settings.template.json` into
 `hooks/` + `scripts/`. It does NOT touch your API key, OAuth tokens, memory,
 or session transcripts.
 
-Use `.\install.ps1 -DryRun` to preview without writing.
-Use `.\install.ps1 -SkipSettings` to keep your existing `settings.json`.
+- `.\install.ps1 -DryRun` to preview without writing
+- `.\install.ps1 -SkipSettings` to keep your existing `settings.json`
+- `.\uninstall.ps1` to back out cleanly (preserves customized settings)
+
+## Manual install (macOS / Linux)
+
+The repo ships PowerShell scripts (`install.ps1`, `statusline-command.ps1`),
+which won't run as-is on Unix. The CLAUDE.md, settings template, hooks, and
+SETUP.md are all platform-neutral — install them by hand:
+
+```bash
+REPO=~/Claude-Code-set-up
+CLAUDE_HOME=~/.claude
+
+git clone https://github.com/UseTheForceLuke/Claude-Code-set-up $REPO
+
+# 1. CLAUDE.md
+cp $REPO/CLAUDE.md $CLAUDE_HOME/CLAUDE.md
+
+# 2. Render settings.json (substitute ${CLAUDE_HOME})
+sed "s|\${CLAUDE_HOME}|$CLAUDE_HOME|g" $REPO/settings.template.json > $CLAUDE_HOME/settings.json
+
+# 3. Hooks
+mkdir -p $CLAUDE_HOME/hooks
+cp $REPO/hooks/*.py $CLAUDE_HOME/hooks/
+
+# 4. Statusline — the PowerShell script will NOT work on macOS/Linux.
+#    Either skip the statusLine block in settings.json, or write your own
+#    shell-script equivalent. The script reads session JSON from stdin and
+#    prints "session-id | NN% ctx | NNNk left".
+```
+
+Drop the `statusLine` block from your settings.json if you don't have a Unix
+equivalent — Claude Code falls back to its built-in statusline cleanly.
 
 ## Layout
 
