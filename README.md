@@ -123,9 +123,14 @@ Drop any key to revert that piece to Claude Code's built-in default.
 
 ## Optional: enable the OAuth leak guard
 
-`hooks/block-oauth-leak.py` scans staged git diffs and blocks commits
-containing JWT tokens (`eyJ...`), `.auth/` directory files, or common
-credential filenames. It's shipped in the repo but **not wired by default**.
+`hooks/block-oauth-leak.py` scans git diffs and blocks both **commits and
+pushes** that contain JWT tokens (`eyJ...`), `.auth/` directory files, or
+common credential filenames. It's shipped in the repo but **not wired by
+default**.
+
+- For `git commit`: scans the staged diff
+- For `git push`: scans commits ahead of upstream (catches an already-committed
+  leak before it leaves the machine)
 
 To activate, add to `~/.claude/settings.json`:
 
@@ -139,7 +144,7 @@ To activate, add to `~/.claude/settings.json`:
           {
             "type": "command",
             "command": "python \"C:/Users/You/.claude/hooks/block-oauth-leak.py\"",
-            "if": "Bash(git commit *)"
+            "if": "Bash(git commit *) || Bash(git push *)"
           }
         ]
       }
@@ -148,8 +153,8 @@ To activate, add to `~/.claude/settings.json`:
 }
 ```
 
-Adapt the path to your `~/.claude/` location. Bypassable with `git commit --no-verify`
-when needed.
+Adapt the path to your `~/.claude/` location. Bypassable with `--no-verify`
+when needed (`git commit --no-verify` or `git push --no-verify`).
 
 ## Trim MCP connectors
 

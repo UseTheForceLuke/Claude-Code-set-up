@@ -558,6 +558,19 @@ New-Item -ItemType Directory -Force "$env:USERPROFILE\work\<project>\claude-arti
 
 Sits at the project root, parallel to tracked repos. Not git-tracked itself.
 
+### If the project root IS a git repo
+
+Add `claude-artifacts/` to `.gitignore` so the folder doesn't accidentally get
+committed:
+
+```powershell
+Add-Content "$env:USERPROFILE\work\<project>\.gitignore" "`nclaude-artifacts/"
+```
+
+If the project root is NOT a git repo (it's just a holding directory for
+multiple sibling repos, like our `eScribe/` example), the `.gitignore` step
+is unnecessary — nothing's tracking it anyway.
+
 ### The memory file
 
 `feedback_artifact_location.md` in your project memory dir:
