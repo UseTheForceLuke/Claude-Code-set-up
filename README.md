@@ -78,7 +78,7 @@ Claude-Code-set-up/
 │   ├── block-trunk-commit.py      Blocks accidental commits to trunk/main/master
 │   └── block-oauth-leak.py        Blocks commits with JWTs, .auth/ files, credentials (opt-in)
 ├── scripts/
-│   └── statusline-command.ps1     Status line: session-id | %ctx | k-left
+│   └── statusline-command.ps1     Status line: <dir> | session-id | %ctx | k-left
 ├── install.ps1                    One-command bootstrap into ~/.claude/
 ├── .gitignore                     __pycache__, *.pyc, .DS_Store, Thumbs.db
 ├── README.md                      This file
