@@ -344,6 +344,66 @@ Copy-Item -Recurse `
 # Other projects don't see it; the token budget stays small there.
 ```
 
+## Step 8 — Seed project memory (only verified facts)
+
+Auto-memory lives at `~/.claude/projects/<workdir-slug>/memory/` and auto-loads
+`MEMORY.md` into every session running in that workdir. Topic files lazy-load
+when their MEMORY.md index entry is referenced.
+
+The workdir slug is the cwd with separators replaced by `-`. For
+`C:\Users\Andrey\work\<project>`, the slug is `c--Users-Andrey-work-<project>`.
+
+### What to seed
+
+Only facts you can **cite a source for**. Reading the project's CLAUDE.md and
+extracting verified items beats inferring preferences from session behavior.
+
+Useful categories:
+
+- **`user_role.md`** (type: `user`) — what you work on, primary directory, stack
+  version. Don't invent preferences ("DDD fluency", "light context on
+  frontend") unless explicitly stated.
+- **`reference_<topic>.md`** (type: `reference`) — IDs, endpoint URLs, pipeline
+  numbers, repo slugs. Cite the source file (project CLAUDE.md line / skill
+  SKILL.md) so future-you can re-verify if the value changes.
+- **`feedback_<topic>.md`** (type: `feedback`) — coding conventions, PR
+  workflow rules, anti-patterns. Quote the project CLAUDE.md verbatim where
+  possible.
+
+### What NOT to seed
+
+- **Inferred preferences.** "User prefers terse responses" based on two `tldr?`
+  asks is fragile — the same user wants depth on a different topic next week.
+- **Conventions you haven't read.** Citing `Platform/CLAUDE.md says X` without
+  reading current `Platform/CLAUDE.md` violates Karpathy Rule 8 ("Read before
+  you write"). Stale citations are worse than no citations.
+- **Project initiatives.** Memory entries that name a campaign / spike / sprint
+  decay within weeks; they cost tokens long after the work shipped.
+- **Anything that fits in the project's tracked CLAUDE.md.** If the team
+  already documents PR conventions in `<repo>/CLAUDE.md`, the memory entry
+  duplicates without adding value — and rots independently.
+
+### Example MEMORY.md (anonymized)
+
+```markdown
+- [User role](user_role.md) — Backend dev on Platform team; works in Platform/apis and experiment.LocalBootstrapper
+- [PR workflow](feedback_pr_workflow.md) — Use the team's pr-create skill; never raw `az repos pr create`
+- [Backend C# style](feedback_backend_style.md) — `_underscore` fields, AAA tests, SonarCloud rules
+- [ADO reference](reference_ado.md) — Org, project id, repo id, tenant SQL pipeline id, PR-threads endpoint
+```
+
+Keep the index under ~10 lines so it always fits in context.
+
+### Verification
+
+Open a fresh Claude Code session in the project directory. The first system
+prompt should include your `MEMORY.md` content. If it doesn't show up:
+
+1. Check the workdir slug matches your cwd — it's case-sensitive on Linux/Mac.
+2. On Windows, the slug uses one `-` per backslash, so
+   `C:\Users\You\work\proj` becomes `C--Users-You-work-proj`.
+3. Confirm `MEMORY.md` exists in that directory (`Get-ChildItem` it).
+
 ## Real numbers from one cleanup
 
 | Before | After |
