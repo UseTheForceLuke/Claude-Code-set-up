@@ -1,5 +1,34 @@
+# Python
 __pycache__/
 *.pyc
 *.pyo
+*.egg-info/
+.venv/
+venv/
+
+# OS
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backups / scratch
+*.bak
+*.tmp
+*.orig
+
+# Secrets (defense-in-depth — these shouldn't be in the repo anyway)
+.auth/
+**/.auth/
+*.token
+credentials.json
+.credentials.json
+secrets.json
+*.pem
+*.key

@@ -35,10 +35,14 @@ function Copy-OrDryRun([string]$src, [string]$dst) {
   }
 }
 
-# --- Sanity check ---
+# --- Sanity: create ~/.claude/ if missing ---
 if (-not (Test-Path $ClaudeHome)) {
-  Write-Host "~/.claude/ doesn't exist. Run 'claude' once to create it, then re-run this script." -ForegroundColor Red
-  exit 1
+  if ($DryRun) {
+    Write-Host "==> ~/.claude/ doesn't exist (would create)" -ForegroundColor Yellow
+  } else {
+    Write-Host "==> ~/.claude/ doesn't exist — creating it" -ForegroundColor Cyan
+    New-Item -ItemType Directory -Force $ClaudeHome | Out-Null
+  }
 }
 
 # --- 1. CLAUDE.md ---

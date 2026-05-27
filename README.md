@@ -36,6 +36,10 @@ or session transcripts.
 - `.\install.ps1 -SkipSettings` to keep your existing `settings.json`
 - `.\uninstall.ps1` to back out cleanly (preserves customized settings)
 
+**Restart Claude Code after install.** Settings, hooks, and statusline only
+re-load at session start. If you're already in a session, `Ctrl+D` to exit,
+then `claude` to relaunch.
+
 ## Manual install (macOS / Linux)
 
 The repo ships PowerShell scripts (`install.ps1`, `statusline-command.ps1`),
