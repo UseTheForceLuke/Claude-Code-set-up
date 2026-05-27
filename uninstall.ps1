@@ -1,24 +1,48 @@
-# uninstall.ps1 - remove files this repo installed from ~/.claude/
-#
-# Usage:
-#   .\uninstall.ps1              Remove repo-managed files (prompts before each)
-#   .\uninstall.ps1 -Force       Skip confirmations
-#   .\uninstall.ps1 -DryRun      Show what would be removed without removing
-#
-# What this removes (only files that match what install.ps1 wrote):
-#   ~/.claude/CLAUDE.md
-#   ~/.claude/settings.json       (only if it matches our rendered template)
-#   ~/.claude/hooks/block-trunk-commit.py
-#   ~/.claude/hooks/block-oauth-leak.py
-#   ~/.claude/scripts/statusline-command.ps1
-#
-# What this DOES NOT remove:
-#   ~/.claude/config.json         (your API key)
-#   ~/.claude/.credentials.json   (your OAuth tokens)
-#   ~/.claude/memory/             (your auto-memory)
-#   ~/.claude/projects/           (your session transcripts)
-#   ~/.claude/skills/             (your skills)
-#   Any hooks/scripts you added yourself
+<#
+.SYNOPSIS
+Remove files this repo installed from ~/.claude/.
+
+.DESCRIPTION
+Removes only files that match what install.ps1 wrote:
+  ~/.claude/CLAUDE.md
+  ~/.claude/settings.json       (only if it matches the rendered template byte-for-byte)
+  ~/.claude/hooks/block-trunk-commit.py
+  ~/.claude/hooks/block-oauth-leak.py
+  ~/.claude/scripts/statusline-command.ps1
+
+Does NOT remove:
+  ~/.claude/config.json         (your API key)
+  ~/.claude/.credentials.json   (your OAuth tokens)
+  ~/.claude/memory/             (your auto-memory)
+  ~/.claude/projects/           (your session transcripts)
+  ~/.claude/skills/             (your skills)
+  Any hooks/scripts you added yourself
+
+If your settings.json differs from the template (customized), it is left
+untouched with a warning - delete manually if you want it gone.
+
+.PARAMETER Force
+Skip the per-file confirmation prompt.
+
+.PARAMETER DryRun
+Show what would be removed without removing anything.
+
+.EXAMPLE
+.\uninstall.ps1
+Prompt before removing each file.
+
+.EXAMPLE
+.\uninstall.ps1 -Force
+Remove all repo-installed files without prompting.
+
+.EXAMPLE
+.\uninstall.ps1 -DryRun
+Preview what would be removed.
+
+.LINK
+https://github.com/UseTheForceLuke/Claude-Code-set-up
+#>
+
 
 [CmdletBinding()]
 param(

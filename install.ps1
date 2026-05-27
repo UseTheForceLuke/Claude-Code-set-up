@@ -1,15 +1,38 @@
-# install.ps1 - bootstrap Claude-Code-set-up into ~/.claude/
-#
-# Usage:
-#   .\install.ps1                  Install everything (CLAUDE.md, settings, hooks, scripts)
-#   .\install.ps1 -DryRun          Show what would happen without writing files
-#   .\install.ps1 -SkipSettings    Don't overwrite ~/.claude/settings.json
-#
-# This script does NOT touch:
-#   ~/.claude/config.json          (your Anthropic API key)
-#   ~/.claude/.credentials.json    (your OAuth tokens)
-#   ~/.claude/memory/              (your auto-memory)
-#   ~/.claude/projects/            (your session transcripts)
+<#
+.SYNOPSIS
+Bootstrap Claude-Code-set-up into ~/.claude/.
+
+.DESCRIPTION
+Copies CLAUDE.md, renders settings.template.json into ~/.claude/settings.json
+with $CLAUDE_HOME substituted, and copies hooks/ + scripts/ contents.
+
+Does NOT touch:
+  ~/.claude/config.json          (your Anthropic API key)
+  ~/.claude/.credentials.json    (your OAuth tokens)
+  ~/.claude/memory/              (your auto-memory)
+  ~/.claude/projects/            (your session transcripts)
+
+.PARAMETER DryRun
+Show what would happen without writing files.
+
+.PARAMETER SkipSettings
+Don't overwrite ~/.claude/settings.json (keep your existing one).
+
+.EXAMPLE
+.\install.ps1
+Install everything.
+
+.EXAMPLE
+.\install.ps1 -DryRun
+Preview changes without writing.
+
+.EXAMPLE
+.\install.ps1 -SkipSettings
+Install CLAUDE.md + hooks + scripts but leave settings.json alone.
+
+.LINK
+https://github.com/UseTheForceLuke/Claude-Code-set-up
+#>
 
 [CmdletBinding()]
 param(
