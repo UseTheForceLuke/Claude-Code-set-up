@@ -1,22 +1,24 @@
 # Claude-Code-set-up
 
-Portable, defaults-only Claude Code configuration. Just the global rules — no
-custom skills, no agents, no slash commands, no hooks, no custom statusline.
+Portable Claude Code configuration. Global behavioral rules, a settings
+template, plus optional hook and statusline scripts you can wire in.
 
-For migrating an existing cluttered `~/.claude/` to this clean state, see
+For migrating an existing cluttered `~/.claude/` to a clean state, see
 [CLEANUP.md](CLEANUP.md).
 
 ## Layout
 
 ```
 Claude-Code-set-up/
-├── CLAUDE.md                 Global behavioral rules (Karpathy 12 + personal addendum)
-├── settings.template.json    Empty {} — Claude Code uses all built-in defaults
-├── README.md                 This file
-└── CLEANUP.md                Step-by-step migration guide
+├── CLAUDE.md                      Global behavioral rules (Karpathy 12 + personal addendum)
+├── settings.template.json         settings.json template; ${CLAUDE_HOME} placeholder
+├── hooks/
+│   └── block-trunk-commit.py      Blocks accidental commits to trunk/main/master
+├── scripts/
+│   └── statusline-command.ps1     Status line: session-id | %ctx | k-left
+├── README.md                      This file
+└── CLEANUP.md                     Step-by-step migration guide
 ```
-
-That's it. Four files.
 
 ## Install on a new machine
 
@@ -30,13 +32,23 @@ That's it. Four files.
    Copy-Item $env:USERPROFILE\Claude-Code-set-up\CLAUDE.md $env:USERPROFILE\.claude\CLAUDE.md
    ```
 
-3. Settings — either leave `~/.claude/settings.json` absent (Claude Code uses defaults),
-   or copy the empty template explicitly:
+3. Render settings (substitutes ${CLAUDE_HOME} with the path to ~/.claude/):
    ```powershell
-   Copy-Item $env:USERPROFILE\Claude-Code-set-up\settings.template.json $env:USERPROFILE\.claude\settings.json
+   $claudeHome = "$env:USERPROFILE\.claude" -replace '\\', '/'
+   (Get-Content $env:USERPROFILE\Claude-Code-set-up\settings.template.json) `
+     -replace '\$\{CLAUDE_HOME\}', $claudeHome |
+     Set-Content $env:USERPROFILE\.claude\settings.json
    ```
 
-4. Anthropic API key goes in `~/.claude/config.json` (not in this repo).
+4. Copy hooks and scripts the template references:
+   ```powershell
+   New-Item -ItemType Directory -Force $env:USERPROFILE\.claude\hooks   | Out-Null
+   New-Item -ItemType Directory -Force $env:USERPROFILE\.claude\scripts | Out-Null
+   Copy-Item $env:USERPROFILE\Claude-Code-set-up\hooks\*   $env:USERPROFILE\.claude\hooks\
+   Copy-Item $env:USERPROFILE\Claude-Code-set-up\scripts\* $env:USERPROFILE\.claude\scripts\
+   ```
+
+5. Anthropic API key goes in `~/.claude/config.json` (not in this repo).
 
 ## What lives per-machine (NOT in this repo)
 
@@ -45,20 +57,26 @@ That's it. Four files.
 - `memory/` — auto-memory
 - Runtime state: `history.jsonl`, `sessions/`, `projects/`, etc.
 
-## Adding skills, hooks, statusline back
+## What's in settings.template.json
 
-This repo intentionally ships nothing project- or workflow-specific. If you want
-to add things back later:
+Configures:
+- `model: opus[1m]` — Opus with 1M context window. On Max/Team Premium plans this is the default anyway, but explicit is fine.
+- `effortLevel: xhigh` — Maximum effort reasoning on Opus 4.7. Also the default; explicit is documentation.
+- `permissions.defaultMode: auto` — Auto-approves tool calls (research preview).
+- `permissions.bash: allow` — Intended to allow all Bash; note this may not be the documented syntax. Documented form is `"permissions": {"allow": ["Bash"]}`.
+- `hooks.PreToolUse` — Wires `block-trunk-commit.py` for git commands.
+- `statusLine` — Wires `statusline-command.ps1`.
+- `enabledPlugins.frontend-design` — Enables the frontend-design plugin.
+- `alwaysThinkingEnabled: false`, `autoDreamEnabled: true`, `skipDangerousModePermissionPrompt: true`, `skipAutoPermissionPrompt: true` — assorted UX toggles.
 
-- **Skills**: put them in `<project>/.claude/skills/` (per-project, loads only
-  when you `cd` there) or `~/.claude/skills/` (global, loads every session and
-  costs tokens per turn — use sparingly).
-- **Hooks** (e.g. block commits to trunk): add to `~/.claude/hooks/` and wire
-  via `~/.claude/settings.json`. Example trunk-commit hook and statusline
-  scripts are documented in [CLEANUP.md](CLEANUP.md).
-- **Slash commands** / **subagents**: project-local in `<project>/.claude/`
-  or global in `~/.claude/`.
+Drop any of these to revert that piece to Claude Code's built-in default.
 
-**Rule of thumb:** if it mentions a project name, environment, employee, or
-endpoint, it's project-local. Global skills/commands cost tokens on every
-session — even when irrelevant.
+## Adding project-specific skills
+
+This repo doesn't ship skills — they're project-coupled. For per-project
+skills (loads only when you `cd` into that project), see Step 7 of
+[CLEANUP.md](CLEANUP.md) for the project-skills repo pattern.
+
+**Rule of thumb:** if a skill mentions a project name, environment, employee,
+or endpoint, it's project-local. Global skills cost tokens on every session
+even when irrelevant.
