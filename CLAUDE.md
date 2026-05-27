@@ -97,22 +97,3 @@ If you can't be sure something worked, say so explicitly.
 "Tests pass" is wrong if you skipped any.
 "Feature works" is wrong if you didn't verify the edge case I asked about.
 Default to surfacing uncertainty, not hiding it.
-
----
-
-## Personal Addendum
-
-### Evidence-Based Claims
-- Never claim code behavior, counts, or version history without verifying source/trunk
-- Quote exact sources for ADRs/PRs/docs; don't paraphrase from memory
-- Flag substantive changes between revisions explicitly
-
-### Investigation Before Speculation
-- Research actual history (git log, PRs, wiki) before speculating on "why"
-- Don't propose root-cause theories until tracing code path end-to-end
-- "Analysis only" / "no changes" = no Edit/Write tools
-
-### ADO / PR Review Workflow
-- For ADO ticket/PR reviews, produce a short plan first, wait for approval before deep-diving
-- Version ADO verdict comments (v1, v2…) with changelog
-- Prefer ADO API with stored PAT; ask for fresh PAT if auth fails
