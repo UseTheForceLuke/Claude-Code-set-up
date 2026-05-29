@@ -68,7 +68,7 @@ claude-setup/
 ├── hooks/
 │   └── block-trunk-commit.py      Generic, works in any git repo
 └── scripts/
-    └── statusline-command.ps1     Statusline: session-id | %ctx | k-left
+    └── statusline-command.ps1     Statusline: [model] dir (branch) <mark> <ctx-bar> NN% | k-left
 ```
 
 That's it. No skills, no agents, no slash commands. The whole repo is under 10 KB.
@@ -182,8 +182,8 @@ Get-ChildItem $claude -Recurse -Directory -Filter __pycache__ -ErrorAction Silen
 
 ### Wipe project transcripts, keep current session
 ```powershell
-# Find your CURRENT session UUID — visible in the statusline if you configured it,
-# or use the most recently modified .jsonl
+# Find your CURRENT session UUID via the most recently modified .jsonl
+# (the statusline no longer prints the session-id)
 $projects = "$claude\projects"
 $currentSession = Get-ChildItem "$projects\*\*.jsonl" |
   Sort-Object LastWriteTime -Descending | Select -First 1
