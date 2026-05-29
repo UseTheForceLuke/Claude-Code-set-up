@@ -5,8 +5,14 @@ All notable changes to this portable Claude Code setup repo.
 ## Unreleased
 
 - SETUP.md: add Step 10 documenting the VS Code workspace + terminal split-launch pattern (open VS Code at project root for broad file view, but auto-land the integrated terminal in the main code repo so Claude launches with the right CLAUDE.md/.claude/memory)
-- statusline-command.ps1: add full cwd path to output (workspace.current_dir). New format: `<full-cwd> | session-id | NN% ctx | NNNk left`. Useful when running multiple Claude Code sessions - at-a-glance which dir you're in.
-- test.ps1: updated check #7 to validate the new dir field appears in fallback output
+- statusline-command.ps1: full colorful rewrite. New format: `[model] dir (branch) <mark> <bar> NN% | NNNk left`, where
+  - `[model]` (magenta) is `model.display_name` (e.g. "Opus 4.8"),
+  - `dir` (cyan) is the leaf folder name of `workspace.current_dir`,
+  - `(branch)` (green) is the git branch, truncated to 24 chars with an ellipsis,
+  - `<mark>` is a green check (clean working tree) or yellow dot (uncommitted changes),
+  - `<bar> NN%` is a context-usage fill bar with eighth-block sub-cell precision, colored green <50% / yellow 50-79% / red >=80%.
+  Uses `[char]27` for ESC (PowerShell 5.1 has no `` `e ``) and forces UTF-8 console output so the block glyphs render. Dropped the session-id field.
+- test.ps1: rewrote check #7 to strip ANSI codes and assert the new colored fallback output (`[Claude]` model default + `?% | ?k left`)
 
 - Add `SECURITY.md` documenting what install/uninstall/hooks do and how to audit
 - Add `CHANGELOG.md` (this file)
