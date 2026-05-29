@@ -5,13 +5,15 @@ All notable changes to this portable Claude Code setup repo.
 ## Unreleased
 
 - SETUP.md: add Step 10 documenting the VS Code workspace + terminal split-launch pattern (open VS Code at project root for broad file view, but auto-land the integrated terminal in the main code repo so Claude launches with the right CLAUDE.md/.claude/memory)
-- statusline-command.ps1: full colorful rewrite. New format: `[model] dir (branch) <mark> <bar> NN% | NNNk left`, where
-  - `[model]` (magenta) is `model.display_name` (e.g. "Opus 4.8"),
-  - `dir` (cyan) is the leaf folder name of `workspace.current_dir`,
-  - `(branch)` (green) is the git branch, truncated to 24 chars with an ellipsis,
-  - `<mark>` is a green check (clean working tree) or yellow dot (uncommitted changes),
-  - `<bar> NN%` is a context-usage fill bar with eighth-block sub-cell precision, colored green <50% / yellow 50-79% / red >=80%.
-  Uses `[char]27` for ESC (PowerShell 5.1 has no `` `e ``) and forces UTF-8 console output so the block glyphs render. Dropped the session-id field.
+- statusline-command.ps1: full rewrite into a monochrome grey status line. Format:
+  `[model] dir (branch) <mark> <bar> NN% | NNNk left | $cost` (model.display_name / leaf
+  folder name / git branch truncated to 24 chars with an ellipsis). Everything is grey; the
+  only contrast is the bar (lighter-grey fill on a darker-grey track). The bar uses
+  eighth-block sub-cell precision so the partial leading-edge cell blends in with no gap;
+  clean vs dirty working tree is shown by the marker glyph (check vs dot), not color.
+  `$cost` is the session spend so far (`cost.total_cost_usd`). Uses `[char]27` for ESC
+  (PowerShell 5.1 has no `` `e ``) and forces UTF-8 console output so the block glyphs render.
+  Dropped the session-id field.
 - test.ps1: rewrote check #7 to strip ANSI codes and assert the new colored fallback output (`[Claude]` model default + `?% | ?k left`)
 
 - Add `SECURITY.md` documenting what install/uninstall/hooks do and how to audit
