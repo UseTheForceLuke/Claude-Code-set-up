@@ -4,6 +4,8 @@ All notable changes to this portable Claude Code setup repo.
 
 ## Unreleased
 
+- settings.template.json: change default `model` from `opus[1m]` to `fable` (Fable 5)
+- statusline-command.ps1: `dir` field now shows the full cwd path (`workspace.current_dir`) instead of just the leaf folder name
 - SETUP.md: add Step 10 documenting the VS Code workspace + terminal split-launch pattern (open VS Code at project root for broad file view, but auto-land the integrated terminal in the main code repo so Claude launches with the right CLAUDE.md/.claude/memory)
 - statusline-command.ps1: full rewrite into a monochrome grey status line. Format:
   `[model] dir (branch) <mark> <bar> NN% | NNNk left | $cost` (model.display_name / leaf

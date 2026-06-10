@@ -13,7 +13,7 @@ track so the fill stays visible.
 
 Fields:
   [model]    model.display_name (e.g. "Opus 4.8")
-  dir        basename of workspace.current_dir
+  dir        full path of workspace.current_dir
   (branch)   git branch, truncated to 24 chars with an ellipsis
   <mark>     check = clean working tree; dot = uncommitted changes (state shown by glyph)
   <bar> NN%  context-usage fill bar, eighth-block sub-cell precision on a solid track
@@ -53,11 +53,10 @@ if ($data -and $data.model -and $data.model.display_name) {
     $model_str = [string]$data.model.display_name
 }
 
-# --- Directory basename ---
+# --- Directory full path ---
 $dir_str = "?"
 if ($data -and $data.workspace -and $data.workspace.current_dir) {
-    $dir_str = [System.IO.Path]::GetFileName([string]$data.workspace.current_dir)
-    if (-not $dir_str) { $dir_str = [string]$data.workspace.current_dir }
+    $dir_str = [string]$data.workspace.current_dir
 }
 
 # --- Git branch + dirty state (from cwd reported by Claude Code) ---
