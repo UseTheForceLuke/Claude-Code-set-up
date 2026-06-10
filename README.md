@@ -134,7 +134,7 @@ of each type (`user`, `reference`, `feedback`).
 ## What's in settings.template.json
 
 - `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` — enables FleetView / agent teams
-- `model: opus[1m]` — Opus with 1M context window
+- `model: fable` — Fable 5 as the default model
 - `effortLevel: xhigh` — max documented effort level (default on Opus 4.7)
 - `permissions.defaultMode: auto` + `allow: ["Bash"]` — auto-approve tool calls + pre-approve all Bash
 - `hooks.PreToolUse` — wires `block-trunk-commit.py` for git commands
