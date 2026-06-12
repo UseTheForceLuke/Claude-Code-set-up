@@ -4,7 +4,11 @@ All notable changes to this portable Claude Code setup repo.
 
 ## Unreleased
 
-- settings.template.json: change default `model` from `opus[1m]` to `fable` (Fable 5)
+- settings.template.json: change default `model` from `opus[1m]` to `sonnet`, and add `advisorModel: opus` — recommended pairing (Sonnet as main model, Opus as advisor) gives near-Opus quality at reduced token usage for many workloads
+- hooks (block-trunk-commit.py, block-oauth-leak.py): read stdin as bytes via `json.loads(sys.stdin.buffer.read())` instead of text-mode `json.load(sys.stdin)`, so a leading UTF-8 BOM (prepended by some shells when piping the payload) is stripped instead of throwing — a JSON parse error made the guard silently fail open (exit 0), defeating the hook. Fixes 2 false-negative `test.ps1` failures under a UTF-8-BOM console encoding.
+- block-trunk-commit.py: check the explicit `git push ... main/master/trunk` target *before* the local-branch lookup, so a push to a protected remote ref is still blocked when `git branch --show-current` can't run (cwd isn't a git repo, detached HEAD). Same fail-open class as the BOM fix; also makes `test.ps1`'s trunk check pass regardless of the cwd it's invoked from.
+- settings.template.json: add `autoUpdatesChannel: latest` so re-running `install.ps1` no longer silently drops it from a live `~/.claude/settings.json` that already had it (closes a repo↔live drift gap)
+- README + SETUP.md: statusline layout annotation now includes the `| $cost` field the script actually emits (was stale: stopped at `k-left`)
 - statusline-command.ps1: `dir` field now shows the full cwd path (`workspace.current_dir`) instead of just the leaf folder name
 - SETUP.md: add Step 10 documenting the VS Code workspace + terminal split-launch pattern (open VS Code at project root for broad file view, but auto-land the integrated terminal in the main code repo so Claude launches with the right CLAUDE.md/.claude/memory)
 - statusline-command.ps1: full rewrite into a monochrome grey status line. Format:

@@ -78,7 +78,7 @@ Claude-Code-set-up/
 │   ├── block-trunk-commit.py      Blocks accidental commits to trunk/main/master
 │   └── block-oauth-leak.py        Blocks commits with JWTs, .auth/ files, credentials (opt-in)
 ├── scripts/
-│   └── statusline-command.ps1     Status line: [model] dir (branch) <mark> <ctx-bar> NN% | k-left
+│   └── statusline-command.ps1     Status line: [model] dir (branch) <mark> <ctx-bar> NN% | k-left | $cost
 ├── install.ps1                    One-command bootstrap into ~/.claude/
 ├── .gitignore                     __pycache__, *.pyc, .DS_Store, Thumbs.db
 ├── README.md                      This file
@@ -134,7 +134,7 @@ of each type (`user`, `reference`, `feedback`).
 ## What's in settings.template.json
 
 - `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` — enables FleetView / agent teams
-- `model: fable` — Fable 5 as the default model
+- `model: sonnet` + `advisorModel: opus` — Sonnet as the main model with Opus as the advisor. For certain workloads this gives near-Opus performance with reduced token usage.
 - `effortLevel: xhigh` — max documented effort level (default on Opus 4.7)
 - `permissions.defaultMode: auto` + `allow: ["Bash"]` — auto-approve tool calls + pre-approve all Bash
 - `hooks.PreToolUse` — wires `block-trunk-commit.py` for git commands

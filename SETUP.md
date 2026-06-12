@@ -68,7 +68,7 @@ claude-setup/
 ├── hooks/
 │   └── block-trunk-commit.py      Generic, works in any git repo
 └── scripts/
-    └── statusline-command.ps1     Statusline: [model] dir (branch) <mark> <ctx-bar> NN% | k-left
+    └── statusline-command.ps1     Statusline: [model] dir (branch) <mark> <ctx-bar> NN% | k-left | $cost
 ```
 
 That's it. No skills, no agents, no slash commands. The whole repo is under 10 KB.

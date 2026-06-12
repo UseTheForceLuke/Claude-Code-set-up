@@ -38,7 +38,10 @@ SUSPICIOUS_FILENAMES = (
 
 def main() -> int:
     try:
-        payload = json.load(sys.stdin)
+        # Read bytes so json.loads strips a leading UTF-8 BOM (some shells prepend
+        # one when piping stdin); text-mode json.load(sys.stdin) would choke on it
+        # and a security guard must not silently fail open on a BOM.
+        payload = json.loads(sys.stdin.buffer.read())
     except Exception:
         return 0  # Fail open on malformed input
 
